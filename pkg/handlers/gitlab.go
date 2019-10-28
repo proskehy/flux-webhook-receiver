@@ -6,29 +6,24 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/proskehy/flux-webhook-receiver/pkg/config"
 )
 
 type GitLab struct {
-	GitHost string
-	Secret  string
+	Config *config.Config
 }
 
 type GitLabPayload struct {
 	Ref        string `json:"ref"`
 	Repository struct {
-		URL string `json:"git_http_url"`
+		URL string `json:"url"`
 	} `json:"repository"`
-}
-
-func NewGitLab(gh string) *GitLab {
-	return &GitLab{
-		GitHost: gh,
-	}
 }
 
 func (h *GitLab) GitSync(body []byte, header http.Header) {
 	signature := header.Get("X-Gitlab-Token")
-	if !(subtle.ConstantTimeCompare([]byte(signature), []byte(h.Secret)) == 1) {
+	if !(subtle.ConstantTimeCompare([]byte(signature), []byte(h.Config.Secret)) == 1) {
 		log.Println("Error: verification of the request secret didn't pass")
 		return
 	}
@@ -42,5 +37,9 @@ func (h *GitLab) GitSync(body []byte, header http.Header) {
 
 	branch := strings.Split(p.Ref, "/")
 	p.Ref = branch[len(branch)-1]
+	if p.Ref != h.Config.GitBranch {
+		log.Printf("Not calling notify, receivde update refers to %s, not %s", p.Ref, h.Config.GitBranch)
+		return
+	}
 	log.Printf("Call localhost:3030/notify with payload %s", GitChange{Kind: "git", Source: Source{URL: p.Repository.URL, Branch: p.Ref}})
 }

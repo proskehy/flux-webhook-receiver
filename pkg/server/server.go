@@ -14,8 +14,8 @@ type Server struct {
 	lock    uint32
 }
 
-func NewServer(h handlers.Handler) Server {
-	return Server{
+func NewServer(h handlers.Handler) *Server {
+	return &Server{
 		Handler: h,
 	}
 }

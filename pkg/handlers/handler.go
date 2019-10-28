@@ -1,6 +1,8 @@
 package handlers
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type Handler interface {
 	GitSync(body []byte, header http.Header)
