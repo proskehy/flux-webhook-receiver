@@ -1,37 +1,40 @@
-package handlers
+package git
 
 import (
-	"crypto/subtle"
 	"encoding/json"
 	"log"
 	"net/http"
 	"strings"
 
 	"github.com/proskehy/flux-webhook-receiver/pkg/config"
+	"github.com/proskehy/flux-webhook-receiver/pkg/utils"
 )
 
-type GitLab struct {
+type GitHub struct {
 	Config *config.Config
 }
 
-type GitLabPayload struct {
+type GitHubPayload struct {
 	Ref        string `json:"ref"`
 	Repository struct {
-		URL string `json:"url"`
+		URL string `json:"ssh_url"`
 	} `json:"repository"`
 }
 
-func (h *GitLab) GitSync(body []byte, header http.Header) {
-	signature := header.Get("X-Gitlab-Token")
-	if !(subtle.ConstantTimeCompare([]byte(signature), []byte(h.Config.Secret)) == 1) {
-		log.Println("Error: verification of the request secret didn't pass")
-		return
+func (h *GitHub) GitSync(body []byte, header http.Header) {
+	signature := header.Get("X-Hub-Signature")
+	if len(h.Config.Secret) != 0 {
+		valid := utils.VerifySignatureSHA1(signature, h.Config.Secret, body)
+		if !valid {
+			log.Printf("Error: verification of the request secret didn't pass")
+			return
+		}
 	}
 
-	var p GitLabPayload
+	var p GitHubPayload
 
 	if err := json.Unmarshal(body, &p); err != nil {
-		log.Printf("Error unmarshalling payload: %s", err)
+		log.Printf("Error unmarshalling git webhook payload: %s", err)
 		return
 	}
 

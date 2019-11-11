@@ -1,4 +1,4 @@
-package handlers
+package git
 
 import (
 	"encoding/json"
@@ -41,7 +41,7 @@ func (h *BitbucketServer) GitSync(body []byte, header http.Header) {
 	var p BitbucketServerPayload
 
 	if err := json.Unmarshal(body, &p); err != nil {
-		log.Printf("Error unmarshalling payload: %s", err)
+		log.Printf("Error unmarshalling git webhook payload: %s", err)
 		return
 	}
 

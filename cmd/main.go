@@ -8,26 +8,34 @@ import (
 
 	"github.com/proskehy/flux-webhook-receiver/pkg/config"
 
-	"github.com/proskehy/flux-webhook-receiver/pkg/handlers"
+	"github.com/proskehy/flux-webhook-receiver/pkg/handlers/git"
+	"github.com/proskehy/flux-webhook-receiver/pkg/handlers/image"
 	"github.com/proskehy/flux-webhook-receiver/pkg/server"
 )
 
-func initServer() (*server.Server, *config.Config) {
+func initServer() *server.Server {
+	s := server.NewServer()
 	c := createConfig()
 	switch c.GitHost {
 	case "github":
-		return server.NewServer(&handlers.GitHub{Config: c}), c
+		s.GitHandler = &git.GitHub{Config: c}
 	case "gitlab":
-		return server.NewServer(&handlers.GitLab{Config: c}), c
+		s.GitHandler = &git.GitLab{Config: c}
 	case "bitbucket":
-		return server.NewServer(&handlers.Bitbucket{Config: c}), c
+		if len(c.Secret) > 0 {
+			log.Println("Warning: running bitbucket with secret set, bitbucket doesn't support secrets")
+		}
+		s.GitHandler = &git.Bitbucket{Config: c}
 	case "bitbucket_server":
-		return server.NewServer(&handlers.BitbucketServer{Config: c}), c
+		s.GitHandler = &git.BitbucketServer{Config: c}
 	default:
 		c.GitHost = "github"
 		c.GitBranch = "master"
-		return server.NewServer(&handlers.GitHub{Config: c}), c
+		s.GitHandler = &git.GitHub{Config: c}
 	}
+	s.ImageHandler = &image.Flux{}
+	log.Printf("Running with config: secret: %s, git branch: %s, git host: %s", c.Secret, c.GitBranch, c.GitHost)
+	return s
 }
 
 func createConfig() *config.Config {
@@ -39,8 +47,8 @@ func createConfig() *config.Config {
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	s, c := initServer()
-	log.Printf("Running with config: secret: %s, git branch: %s, git host: %s", c.Secret, c.GitBranch, c.GitHost)
+	s := initServer()
 	http.HandleFunc("/gitSync", s.GitSync)
+	http.HandleFunc("/imageSync", s.ImageSync)
 	log.Fatal(http.ListenAndServe(":3031", nil))
 }

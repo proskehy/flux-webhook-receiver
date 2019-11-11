@@ -1,4 +1,4 @@
-package handlers
+package git
 
 type GitChange struct {
 	Kind   string

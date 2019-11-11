@@ -1,4 +1,4 @@
-package handlers
+package git
 
 import (
 	"net/http"
