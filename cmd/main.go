@@ -50,5 +50,5 @@ func main() {
 	s := initServer()
 	http.HandleFunc("/gitSync", s.GitSync)
 	http.HandleFunc("/imageSync", s.ImageSync)
-	log.Fatal(http.ListenAndServe(":3031", nil))
+	log.Fatal(http.ListenAndServe(":3033", nil))
 }

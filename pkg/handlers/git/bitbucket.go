@@ -45,5 +45,5 @@ func (h *Bitbucket) GitSync(body []byte, header http.Header) {
 		log.Printf("Not calling notify, received update refers to %s, not %s", c.Source.Branch, h.Config.GitBranch)
 		return
 	}
-	log.Printf("Call localhost:3030/notify with payload %s", c)
+	SendFluxNotification(&c)
 }

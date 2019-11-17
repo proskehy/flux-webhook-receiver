@@ -1,11 +1,14 @@
-package utils
+package git
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"log"
+	"net/http"
 )
 
 func VerifySignatureSHA1(signature, secret string, payload []byte) bool {
@@ -38,4 +41,21 @@ func VerifySignatureSHA256(signature, secret string, payload []byte) bool {
 		return false
 	}
 	return true
+}
+
+func SendFluxNotification(c *GitChange) {
+	requestBody, err := json.Marshal(c)
+	if err != nil {
+		log.Printf("Error marshalling payload: %s", err)
+	}
+
+	log.Printf("Notifying Flux about %s change", c.Kind)
+
+	resp, err := http.Post("http://localhost:3030/api/flux/v11/notify", "application/json", bytes.NewBuffer(requestBody))
+	if err != nil {
+		log.Printf("Error delivering Flux notification: %s", err)
+	}
+
+	log.Println("test")
+	resp.Body.Close()
 }

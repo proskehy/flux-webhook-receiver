@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/proskehy/flux-webhook-receiver/pkg/config"
-	"github.com/proskehy/flux-webhook-receiver/pkg/utils"
 )
 
 type BitbucketServer struct {
@@ -31,7 +30,7 @@ type BitbucketServerPayload struct {
 func (h *BitbucketServer) GitSync(body []byte, header http.Header) {
 	signature := header.Get("X-Hub-Signature")
 	if len(h.Config.Secret) != 0 {
-		valid := utils.VerifySignatureSHA256(signature, h.Config.Secret, body)
+		valid := VerifySignatureSHA256(signature, h.Config.Secret, body)
 		if !valid {
 			log.Printf("Error: verification of the request secret didn't pass")
 			return
@@ -59,5 +58,5 @@ func (h *BitbucketServer) GitSync(body []byte, header http.Header) {
 		log.Printf("Not calling notify, received update refers to %s, not %s", c.Source.Branch, h.Config.GitBranch)
 		return
 	}
-	log.Printf("Call localhost:3030/notify with payload %s", c)
+	SendFluxNotification(&c)
 }

@@ -38,8 +38,9 @@ func (h *GitLab) GitSync(body []byte, header http.Header) {
 	branch := strings.Split(p.Ref, "/")
 	p.Ref = branch[len(branch)-1]
 	if p.Ref != h.Config.GitBranch {
-		log.Printf("Not calling notify, receivde update refers to %s, not %s", p.Ref, h.Config.GitBranch)
+		log.Printf("Not calling notify, received update refers to %s, not %s", p.Ref, h.Config.GitBranch)
 		return
 	}
-	log.Printf("Call localhost:3030/notify with payload %s", GitChange{Kind: "git", Source: Source{URL: p.Repository.URL, Branch: p.Ref}})
+	change := GitChange{Kind: "git", Source: Source{URL: p.Repository.URL, Branch: p.Ref}}
+	SendFluxNotification(&change)
 }

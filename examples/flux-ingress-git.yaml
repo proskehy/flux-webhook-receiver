@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: flux-git-webhook
+  namespace: flux
+  annotations:
+    kubernetes.io/ingress.class: nginx    
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /gitSync
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /flux/gitSync
+        backend:
+          serviceName: flux-service
+          servicePort: 3033
