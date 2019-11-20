@@ -56,6 +56,7 @@ func SendFluxNotification(c *GitChange) {
 		log.Printf("Error delivering Flux notification: %s", err)
 	}
 
-	log.Println("test")
-	resp.Body.Close()
+	if resp != nil {
+		resp.Body.Close()
+	}
 }

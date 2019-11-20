@@ -2,7 +2,8 @@ A tool to receive webhooks regarding Git/image changes and send a notification t
 
 It lets you setup webhooks from GitHub, GitLab, Bitbucket and Bitbucket Server.  
 For the services which allow it, you can configure a secret to verify the incoming payload.  
-You can also set the branch that you want to receive events from.
+You can also set the branch that you want to receive events from.  
+The image change webhook is currently setup to receive the same payload as Flux's notify API, that is `'{"kind":"image", "source": {"Name":{"domain":"", "image":""}}}'`. Support for webhooks from specific Docker image registries could be added in the future.
 
 # Setup
 

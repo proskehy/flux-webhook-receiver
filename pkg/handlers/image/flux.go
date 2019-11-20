@@ -1,6 +1,7 @@
 package image
 
 import (
+	"bytes"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -26,5 +27,19 @@ func (h *Flux) ImageSync(body []byte, header http.Header) {
 		return
 	}
 
-	log.Printf("Call localhost:3030/notify with payload %s", p)
+	requestBody, err := json.Marshal(p)
+	if err != nil {
+		log.Printf("Error marshalling payload: %s", err)
+	}
+
+	log.Printf("Notifying Flux about %s change", p.Kind)
+
+	resp, err := http.Post("http://localhost:3030/api/flux/v11/notify", "application/json", bytes.NewBuffer(requestBody))
+	if err != nil {
+		log.Printf("Error delivering Flux notification: %s", err)
+	}
+
+	if resp != nil {
+		resp.Body.Close()
+	}
 }
