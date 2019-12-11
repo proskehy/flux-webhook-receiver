@@ -6,7 +6,9 @@ import (
 	"net/http"
 	"strings"
 
+	flux_api "github.com/fluxcd/flux/pkg/api/v9"
 	"github.com/proskehy/flux-webhook-receiver/pkg/config"
+	"github.com/proskehy/flux-webhook-receiver/pkg/utils"
 )
 
 type BitbucketServer struct {
@@ -30,7 +32,7 @@ type BitbucketServerPayload struct {
 func (h *BitbucketServer) GitSync(body []byte, header http.Header) {
 	signature := header.Get("X-Hub-Signature")
 	if len(h.Config.Secret) != 0 {
-		valid := VerifySignatureSHA256(signature, h.Config.Secret, body)
+		valid := utils.VerifySignatureSHA256(signature, h.Config.Secret, body)
 		if !valid {
 			log.Printf("Error: verification of the request secret didn't pass")
 			return
@@ -44,19 +46,26 @@ func (h *BitbucketServer) GitSync(body []byte, header http.Header) {
 		return
 	}
 
-	c := GitChange{Kind: "git"}
+	var url, branch string
 	for _, l := range p.Repository.Links.Clone {
 		if l.Name == "ssh" {
-			c.Source.URL = l.Href
+			url = l.Href
 		}
 	}
 	if len(p.Changes) > 0 {
-		branch := strings.Split(p.Changes[0].RefID, "/")
-		c.Source.Branch = branch[len(branch)-1]
+		b := strings.Split(p.Changes[0].RefID, "/")
+		branch = b[len(b)-1]
 	}
-	if c.Source.Branch != h.Config.GitBranch {
-		log.Printf("Not calling notify, received update refers to %s, not %s", c.Source.Branch, h.Config.GitBranch)
+	if branch != h.Config.GitBranch {
+		log.Printf("Not calling notify, received update refers to %s, not %s", branch, h.Config.GitBranch)
 		return
 	}
-	SendFluxNotification(&c)
+	c := flux_api.Change{
+		Kind: flux_api.GitChange,
+		Source: flux_api.GitUpdate{
+			URL:    url,
+			Branch: branch,
+		},
+	}
+	utils.SendFluxNotification(&c)
 }

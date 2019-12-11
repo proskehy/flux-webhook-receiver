@@ -6,7 +6,9 @@ import (
 	"log"
 	"net/http"
 
+	flux_api "github.com/fluxcd/flux/pkg/api/v9"
 	"github.com/proskehy/flux-webhook-receiver/pkg/config"
+	"github.com/proskehy/flux-webhook-receiver/pkg/utils"
 )
 
 type Bitbucket struct {
@@ -36,14 +38,21 @@ func (h *Bitbucket) GitSync(body []byte, header http.Header) {
 		return
 	}
 
-	c := GitChange{Kind: "git"}
-	c.Source.URL = fmt.Sprintf("git@bitbucket.org:%s.git", p.Repository.FullName)
+	var url = fmt.Sprintf("git@bitbucket.org:%s.git", p.Repository.FullName)
+	var branch string
 	if len(p.Push.Changes) > 0 {
-		c.Source.Branch = p.Push.Changes[0].New.Name
+		branch = p.Push.Changes[0].New.Name
 	}
-	if c.Source.Branch != h.Config.GitBranch {
-		log.Printf("Not calling notify, received update refers to %s, not %s", c.Source.Branch, h.Config.GitBranch)
+	if branch != h.Config.GitBranch {
+		log.Printf("Not calling notify, received update refers to %s, not %s", branch, h.Config.GitBranch)
 		return
 	}
-	SendFluxNotification(&c)
+	c := flux_api.Change{
+		Kind: flux_api.GitChange,
+		Source: flux_api.GitUpdate{
+			URL:    url,
+			Branch: branch,
+		},
+	}
+	utils.SendFluxNotification(&c)
 }

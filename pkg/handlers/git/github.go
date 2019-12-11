@@ -6,7 +6,9 @@ import (
 	"net/http"
 	"strings"
 
+	flux_api "github.com/fluxcd/flux/pkg/api/v9"
 	"github.com/proskehy/flux-webhook-receiver/pkg/config"
+	"github.com/proskehy/flux-webhook-receiver/pkg/utils"
 )
 
 type GitHub struct {
@@ -23,7 +25,7 @@ type GitHubPayload struct {
 func (h *GitHub) GitSync(body []byte, header http.Header) {
 	signature := header.Get("X-Hub-Signature")
 	if len(h.Config.Secret) != 0 {
-		valid := VerifySignatureSHA1(signature, h.Config.Secret, body)
+		valid := utils.VerifySignatureSHA1(signature, h.Config.Secret, body)
 		if !valid {
 			log.Printf("Error: verification of the request secret didn't pass")
 			return
@@ -44,6 +46,12 @@ func (h *GitHub) GitSync(body []byte, header http.Header) {
 		return
 	}
 
-	change := GitChange{Kind: "git", Source: Source{URL: p.Repository.URL, Branch: p.Ref}}
-	SendFluxNotification(&change)
+	c := flux_api.Change{
+		Kind: flux_api.GitChange,
+		Source: flux_api.GitUpdate{
+			URL:    p.Repository.URL,
+			Branch: p.Ref,
+		},
+	}
+	utils.SendFluxNotification(&c)
 }

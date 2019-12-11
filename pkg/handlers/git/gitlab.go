@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"strings"
 
+	flux_api "github.com/fluxcd/flux/pkg/api/v9"
 	"github.com/proskehy/flux-webhook-receiver/pkg/config"
+	"github.com/proskehy/flux-webhook-receiver/pkg/utils"
 )
 
 type GitLab struct {
@@ -41,6 +43,13 @@ func (h *GitLab) GitSync(body []byte, header http.Header) {
 		log.Printf("Not calling notify, received update refers to %s, not %s", p.Ref, h.Config.GitBranch)
 		return
 	}
-	change := GitChange{Kind: "git", Source: Source{URL: p.Repository.URL, Branch: p.Ref}}
-	SendFluxNotification(&change)
+
+	c := flux_api.Change{
+		Kind: flux_api.GitChange,
+		Source: flux_api.GitUpdate{
+			URL:    p.Repository.URL,
+			Branch: p.Ref,
+		},
+	}
+	utils.SendFluxNotification(&c)
 }

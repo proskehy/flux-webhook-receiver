@@ -31,10 +31,11 @@ func initServer() *server.Server {
 	default:
 		c.GitHost = "github"
 		c.GitBranch = "master"
+		c.DockerHost = "dockerhub"
+		s.ImageHandler = &image.DockerHub{}
 		s.GitHandler = &git.GitHub{Config: c}
 	}
-	s.ImageHandler = &image.Flux{}
-	log.Printf("Running with config: secret: %s, git branch: %s, git host: %s", c.Secret, c.GitBranch, c.GitHost)
+	log.Printf("Running with config: secret: %s, git branch: %s, git host: %s, docker host: %s", c.Secret, c.GitBranch, c.GitHost, c.DockerHost)
 	return s
 }
 
@@ -42,7 +43,8 @@ func createConfig() *config.Config {
 	s := os.Getenv("GIT_WEBHOOK_SECRET")
 	gb := os.Getenv("GIT_BRANCH")
 	gh := strings.ToLower(os.Getenv("GIT_HOST"))
-	return config.NewConfig(gh, gb, s)
+	dh := strings.ToLower(os.Getenv("DOCKER_HOST"))
+	return config.NewConfig(gh, gb, s, dh)
 }
 
 func main() {
