@@ -1,10 +1,18 @@
-A tool to receive webhooks regarding Git/image changes and send a notification to [Weave flux](https://github.com/weaveworks/flux).
+A tool to receive webhooks regarding Git/Docker image changes and send a notification to [Weave flux](https://github.com/weaveworks/flux).
 
-It lets you setup webhooks from GitHub, GitLab, Bitbucket and Bitbucket Server.  
+# Supported services  
+
+`flux-webhook-receiver` lets you setup Git repository webhooks from
+ * GitHub,
+ * GitLab,
+ * Bitbucket,
+ * Bitbucket Server  
+and Docker image webhooks from
+ * DockerHub and
+ * Nexus.
+
 For the services which allow it, you can configure a secret to verify the incoming payload.  
-You can also set the branch that you want to receive events from.  
-
-The image change webhook currently only supports DockerHub webhooks.
+You can also set the Git branch that you want to receive events from.  
 
 # Setup
 
@@ -17,6 +25,8 @@ The service runs on port `3033` and individual webhook handlers are exposed on p
 
 Environment variables to configure the deployment:
 
-  * `GIT_WEBHOOK_SECRET`: secret to verify the payload with (not set by default) 
-  * `GIT_BRANCH`: branch to receive webhooks from (default `master`)
-  * `GIT_HOST`: repository host that the webhooks will be coming from (default `github`) 
+  * `GIT_WEBHOOK_SECRET`: secret to verify the git repo webhook payload with (not set by default) 
+  * `GIT_BRANCH`: git branch to receive webhooks from (default `master`)
+  * `GIT_HOST`: git repository host that the webhooks will be coming from (default `github`) 
+  * `DOCKER_HOST`: Docker registry host that the webhooks will be coming from (default `dockerhub`) 
+  * `DOCKER_WEBHOOK_SECRET`: secret to verify the Docker registry webhook payload with (not set by default)

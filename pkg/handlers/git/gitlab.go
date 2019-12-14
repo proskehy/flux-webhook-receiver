@@ -25,7 +25,7 @@ type GitLabPayload struct {
 
 func (h *GitLab) GitSync(body []byte, header http.Header) {
 	signature := header.Get("X-Gitlab-Token")
-	if !(subtle.ConstantTimeCompare([]byte(signature), []byte(h.Config.Secret)) == 1) {
+	if !(subtle.ConstantTimeCompare([]byte(signature), []byte(h.Config.GitSecret)) == 1) {
 		log.Println("Error: verification of the request secret didn't pass")
 		return
 	}

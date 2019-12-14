@@ -22,7 +22,7 @@ func initServer() *server.Server {
 	case "gitlab":
 		s.GitHandler = &git.GitLab{Config: c}
 	case "bitbucket":
-		if len(c.Secret) > 0 {
+		if len(c.GitSecret) > 0 {
 			log.Println("Warning: running bitbucket with secret set, bitbucket doesn't support secrets")
 		}
 		s.GitHandler = &git.Bitbucket{Config: c}
@@ -31,20 +31,31 @@ func initServer() *server.Server {
 	default:
 		c.GitHost = "github"
 		c.GitBranch = "master"
-		c.DockerHost = "dockerhub"
-		s.ImageHandler = &image.DockerHub{}
 		s.GitHandler = &git.GitHub{Config: c}
 	}
-	log.Printf("Running with config: secret: %s, git branch: %s, git host: %s, docker host: %s", c.Secret, c.GitBranch, c.GitHost, c.DockerHost)
+	switch c.DockerHost {
+	case "dockerhub":
+		if len(c.DockerSecret) > 0 {
+			log.Println("Warning: running dockerhub with secret set, dockerhub doesn't support secrets")
+		}
+		s.ImageHandler = &image.DockerHub{}
+	case "nexus":
+		s.ImageHandler = &image.Nexus{Config: c}
+	default:
+		c.DockerHost = "dockerhub"
+		s.ImageHandler = &image.DockerHub{}
+	}
+	log.Printf("Running with config: Git secret: %s, git branch: %s, git host: %s, docker host: %s, docker secret: %s", c.GitSecret, c.GitBranch, c.GitHost, c.DockerHost, c.DockerSecret)
 	return s
 }
 
 func createConfig() *config.Config {
-	s := os.Getenv("GIT_WEBHOOK_SECRET")
+	gs := os.Getenv("GIT_WEBHOOK_SECRET")
 	gb := os.Getenv("GIT_BRANCH")
 	gh := strings.ToLower(os.Getenv("GIT_HOST"))
 	dh := strings.ToLower(os.Getenv("DOCKER_HOST"))
-	return config.NewConfig(gh, gb, s, dh)
+	ds := strings.ToLower(os.Getenv("DOCKER_WEBHOOK_SECRET"))
+	return config.NewConfig(gh, gb, gs, dh, ds)
 }
 
 func main() {

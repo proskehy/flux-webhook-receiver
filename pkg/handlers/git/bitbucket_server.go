@@ -31,8 +31,8 @@ type BitbucketServerPayload struct {
 
 func (h *BitbucketServer) GitSync(body []byte, header http.Header) {
 	signature := header.Get("X-Hub-Signature")
-	if len(h.Config.Secret) != 0 {
-		valid := utils.VerifySignatureSHA256(signature, h.Config.Secret, body)
+	if len(h.Config.GitSecret) != 0 {
+		valid := utils.VerifySignatureSHA256(signature, h.Config.GitSecret, body)
 		if !valid {
 			log.Printf("Error: verification of the request secret didn't pass")
 			return

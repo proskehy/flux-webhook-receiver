@@ -23,7 +23,7 @@ func VerifySignatureSHA1(signature, secret string, payload []byte) bool {
 	mac.Write(payload)
 	expectedMAC := hex.EncodeToString(mac.Sum(nil))
 
-	if !hmac.Equal([]byte(signature[5:]), []byte(expectedMAC)) {
+	if !hmac.Equal([]byte(signature), []byte(expectedMAC)) {
 		return false
 	}
 	return true
