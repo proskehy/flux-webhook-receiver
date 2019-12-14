@@ -7,13 +7,11 @@ import (
 
 	flux_api "github.com/fluxcd/flux/pkg/api/v9"
 	"github.com/fluxcd/flux/pkg/image"
-	"github.com/proskehy/flux-webhook-receiver/pkg/config"
 	"github.com/proskehy/flux-webhook-receiver/pkg/utils"
+	"github.com/spf13/viper"
 )
 
-type Nexus struct {
-	Config *config.Config
-}
+type Nexus struct{}
 
 type NexusPayload struct {
 	Component struct {
@@ -22,9 +20,11 @@ type NexusPayload struct {
 }
 
 func (h *Nexus) ImageSync(body []byte, header http.Header) {
+	cfgSecret := viper.GetString("DOCKER_WEBHOOK_SECRET")
+
 	signature := header.Get("X-Nexus-Webhook-Signature")
-	if len(h.Config.DockerSecret) != 0 {
-		valid := utils.VerifySignatureSHA1(signature, h.Config.DockerSecret, body)
+	if len(cfgSecret) != 0 {
+		valid := utils.VerifySignatureSHA1(signature, cfgSecret, body)
 		if !valid {
 			log.Printf("Error: verification of the request secret didn't pass")
 			return

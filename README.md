@@ -28,5 +28,5 @@ Environment variables to configure the deployment:
   * `GIT_WEBHOOK_SECRET`: secret to verify the git repo webhook payload with (not set by default) 
   * `GIT_BRANCH`: git branch to receive webhooks from (default `master`)
   * `GIT_HOST`: git repository host that the webhooks will be coming from (default `github`) 
-  * `DOCKER_HOST`: Docker registry host that the webhooks will be coming from (default `dockerhub`) 
+  * `FLUX_DOCKER_HOST`: Docker registry host that the webhooks will be coming from (default `dockerhub`) 
   * `DOCKER_WEBHOOK_SECRET`: secret to verify the Docker registry webhook payload with (not set by default)

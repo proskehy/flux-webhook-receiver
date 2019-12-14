@@ -7,13 +7,11 @@ import (
 	"strings"
 
 	flux_api "github.com/fluxcd/flux/pkg/api/v9"
-	"github.com/proskehy/flux-webhook-receiver/pkg/config"
 	"github.com/proskehy/flux-webhook-receiver/pkg/utils"
+	"github.com/spf13/viper"
 )
 
-type GitHub struct {
-	Config *config.Config
-}
+type GitHub struct{}
 
 type GitHubPayload struct {
 	Ref        string `json:"ref"`
@@ -23,9 +21,11 @@ type GitHubPayload struct {
 }
 
 func (h *GitHub) GitSync(body []byte, header http.Header) {
+	cfgSecret := viper.GetString("GIT_WEBHOOK_SECRET")
+	cfgBranch := viper.GetString("GIT_BRANCH")
 	signature := header.Get("X-Hub-Signature")
-	if len(h.Config.GitSecret) != 0 {
-		valid := utils.VerifySignatureSHA1(signature[5:], h.Config.GitSecret, body)
+	if len(cfgSecret) != 0 {
+		valid := utils.VerifySignatureSHA1(signature[5:], cfgSecret, body)
 		if !valid {
 			log.Printf("Error: verification of the request secret didn't pass")
 			return
@@ -41,8 +41,8 @@ func (h *GitHub) GitSync(body []byte, header http.Header) {
 
 	branch := strings.Split(p.Ref, "/")
 	p.Ref = branch[len(branch)-1]
-	if p.Ref != h.Config.GitBranch {
-		log.Printf("Not calling notify, received update refers to %s, not %s", p.Ref, h.Config.GitBranch)
+	if p.Ref != cfgBranch {
+		log.Printf("Not calling notify, received update refers to %s, not %s", p.Ref, cfgBranch)
 		return
 	}
 

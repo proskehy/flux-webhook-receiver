@@ -7,13 +7,11 @@ import (
 	"net/http"
 
 	flux_api "github.com/fluxcd/flux/pkg/api/v9"
-	"github.com/proskehy/flux-webhook-receiver/pkg/config"
 	"github.com/proskehy/flux-webhook-receiver/pkg/utils"
+	"github.com/spf13/viper"
 )
 
-type Bitbucket struct {
-	Config *config.Config
-}
+type Bitbucket struct{}
 
 type BitbucketPayload struct {
 	Repository struct {
@@ -31,6 +29,8 @@ type BitbucketPayload struct {
 func (h *Bitbucket) GitSync(body []byte, header http.Header) {
 	// can't verify signature (bitbucket doesn't offer that functionality)
 
+	cfgBranch := viper.GetString("GIT_BRANCH")
+
 	var p BitbucketPayload
 
 	if err := json.Unmarshal(body, &p); err != nil {
@@ -43,8 +43,8 @@ func (h *Bitbucket) GitSync(body []byte, header http.Header) {
 	if len(p.Push.Changes) > 0 {
 		branch = p.Push.Changes[0].New.Name
 	}
-	if branch != h.Config.GitBranch {
-		log.Printf("Not calling notify, received update refers to %s, not %s", branch, h.Config.GitBranch)
+	if branch != cfgBranch {
+		log.Printf("Not calling notify, received update refers to %s, not %s", branch, cfgBranch)
 		return
 	}
 	c := flux_api.Change{

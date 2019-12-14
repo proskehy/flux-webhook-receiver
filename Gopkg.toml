@@ -29,6 +29,10 @@
   name = "github.com/fluxcd/flux"
   version = "1.16.0"
 
+[[constraint]]
+  name = "github.com/spf13/viper"
+  version = "v1.6.1"
+
 [prune]
   go-tests = true
   unused-packages = true
