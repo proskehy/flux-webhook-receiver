@@ -3,13 +3,12 @@ A tool to receive webhooks regarding Git/Docker image changes and send a notific
 # Supported services  
 
 `flux-webhook-receiver` lets you setup Git repository webhooks from
- * GitHub,
- * GitLab,
- * Bitbucket,
- * Bitbucket Server  
-and Docker image webhooks from
- * DockerHub and
- * Nexus.
+ * `GitHub`,
+ * `GitLab`,
+ * `Bitbucket` and
+ * `Bitbucket Server`.  
+ 
+Docker image webhooks can be configured for `DockerHub` and `Nexus`.
 
 For the services which allow it, you can configure a secret to verify the incoming payload.  
 You can also set the Git branch that you want to receive events from.  
