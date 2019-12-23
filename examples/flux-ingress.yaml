@@ -14,5 +14,5 @@ spec:
       # A catchall path - you would then specify your webhook URL as <url>:<port>/flux/<gitSync/imageSync>
       - path: /flux/(.*)
         backend:
-          serviceName: flux-service
+          serviceName: flux-webhook-service
           servicePort: 3033

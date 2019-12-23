@@ -189,4 +189,8 @@ spec:
         - name: GIT_BRANCH
           value:
         - name: GIT_HOST
+          value: github
+        - name: FLUX_DOCKER_HOST
+          value: dockerhub
+        - name: DOCKER_WEBHOOK_SECRET
           value: 
