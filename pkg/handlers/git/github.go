@@ -22,7 +22,7 @@ type GitHubPayload struct {
 
 func (h *GitHub) GitSync(body []byte, header http.Header) {
 	cfgSecret := viper.GetString("GIT_WEBHOOK_SECRET")
-	cfgBranch := viper.GetString("GIT_BRANCH")
+	cfgBranches := viper.GetStringSlice("GIT_BRANCHES")
 	signature := header.Get("X-Hub-Signature")
 	if len(cfgSecret) != 0 {
 		valid := utils.VerifySignatureSHA1(signature[5:], cfgSecret, body)
@@ -41,8 +41,8 @@ func (h *GitHub) GitSync(body []byte, header http.Header) {
 
 	branch := strings.Split(p.Ref, "/")
 	p.Ref = branch[len(branch)-1]
-	if p.Ref != cfgBranch {
-		log.Printf("Not calling notify, received update refers to %s, not %s", p.Ref, cfgBranch)
+	if !utils.Contains(cfgBranches, p.Ref) {
+		log.Printf("Not calling notify, received update refers to %s, which is not specified in %s", p.Ref, cfgBranches)
 		return
 	}
 

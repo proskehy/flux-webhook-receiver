@@ -18,14 +18,16 @@ You can also set the Git branch that you want to receive events from.
 It is intended to run this tool as a sidecar to Flux (see [Get started with Flux](https://docs.fluxcd.io/en/latest/tutorials/get-started.html)).
 
 Example Flux deployment with the sidecar configured can be found in `examples/flux-deployment.yaml`. 
-Then, you will want to expose the deployment with Ingress, example of that is in `examples/flux-service.yaml` and `examples/flux-ingress.yaml`.  
+Then, you will want to expose the deployment with Ingress, example of that is in `examples/flux-service.yaml` and `examples/flux-ingress.yaml`.  (Apply the namespace, serviceaccount, secret manifests as well if those resources are not present in your cluster yet)
 
 The service runs on port `3033` and individual webhook handlers are exposed on paths `/gitSync` and `/imageSync`.
 
 Environment variables to configure the deployment:
 
-  * `GIT_WEBHOOK_SECRET`: secret to verify the git repo webhook payload with (not set by default) 
-  * `GIT_BRANCH`: git branch to receive webhooks from (default `master`)
-  * `GIT_HOST`: git repository host that the webhooks will be coming from (default `github`) 
+  * `GIT_ENABLED`: Enable the endpoint for Git repo webhooks (default `true`)
+  * `DOCKER_ENABLE`: Enable the endpoit for Docker registry webhooks (default `true`)
+  * `GIT_WEBHOOK_SECRET`: Secret to verify the Git repo webhook payload with (not set by default)
+  * `GIT_BRANCHES`: Git branches to receive webhooks from specified as space separated values e.g. `master develop` (default `master`)
+  * `GIT_HOST`: Git repository host that the webhooks will be coming from (default `github`) 
   * `FLUX_DOCKER_HOST`: Docker registry host that the webhooks will be coming from (default `dockerhub`) 
-  * `DOCKER_WEBHOOK_SECRET`: secret to verify the Docker registry webhook payload with (not set by default)
+  * `DOCKER_WEBHOOK_SECRET`: Secret to verify the Docker registry webhook payload with (not set by default)

@@ -29,7 +29,7 @@ type BitbucketPayload struct {
 func (h *Bitbucket) GitSync(body []byte, header http.Header) {
 	// can't verify signature (bitbucket doesn't offer that functionality)
 
-	cfgBranch := viper.GetString("GIT_BRANCH")
+	cfgBranches := viper.GetStringSlice("GIT_BRANCHES")
 
 	var p BitbucketPayload
 
@@ -43,8 +43,8 @@ func (h *Bitbucket) GitSync(body []byte, header http.Header) {
 	if len(p.Push.Changes) > 0 {
 		branch = p.Push.Changes[0].New.Name
 	}
-	if branch != cfgBranch {
-		log.Printf("Not calling notify, received update refers to %s, not %s", branch, cfgBranch)
+	if !utils.Contains(cfgBranches, branch) {
+		log.Printf("Not calling notify, received update refers to %s, which is not specified in %s", branch, cfgBranches)
 		return
 	}
 	c := flux_api.Change{

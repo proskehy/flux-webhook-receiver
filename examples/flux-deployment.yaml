@@ -186,8 +186,8 @@ spec:
         env:
         - name: GIT_WEBHOOK_SECRET
           value: 
-        - name: GIT_BRANCH
-          value:
+        - name: GIT_BRANCHES
+          value: 
         - name: GIT_HOST
           value: github
         - name: FLUX_DOCKER_HOST

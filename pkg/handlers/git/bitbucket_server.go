@@ -29,7 +29,7 @@ type BitbucketServerPayload struct {
 
 func (h *BitbucketServer) GitSync(body []byte, header http.Header) {
 	cfgSecret := viper.GetString("GIT_WEBHOOK_SECRET")
-	cfgBranch := viper.GetString("GIT_BRANCH")
+	cfgBranches := viper.GetStringSlice("GIT_BRANCHES")
 
 	signature := header.Get("X-Hub-Signature")
 	if len(cfgSecret) != 0 {
@@ -57,8 +57,8 @@ func (h *BitbucketServer) GitSync(body []byte, header http.Header) {
 		b := strings.Split(p.Changes[0].RefID, "/")
 		branch = b[len(b)-1]
 	}
-	if branch != cfgBranch {
-		log.Printf("Not calling notify, received update refers to %s, not %s", branch, cfgBranch)
+	if !utils.Contains(cfgBranches, branch) {
+		log.Printf("Not calling notify, received update refers to %s, which is not specified in %s", branch, cfgBranches)
 		return
 	}
 	c := flux_api.Change{

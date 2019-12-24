@@ -23,7 +23,7 @@ type GitLabPayload struct {
 
 func (h *GitLab) GitSync(body []byte, header http.Header) {
 	cfgSecret := viper.GetString("GIT_WEBHOOK_SECRET")
-	cfgBranch := viper.GetString("GIT_BRANCH")
+	cfgBranches := viper.GetStringSlice("GIT_BRANCHES")
 
 	signature := header.Get("X-Gitlab-Token")
 	if !(subtle.ConstantTimeCompare([]byte(signature), []byte(cfgSecret)) == 1) {
@@ -40,8 +40,8 @@ func (h *GitLab) GitSync(body []byte, header http.Header) {
 
 	branch := strings.Split(p.Ref, "/")
 	p.Ref = branch[len(branch)-1]
-	if p.Ref != cfgBranch {
-		log.Printf("Not calling notify, received update refers to %s, not %s", p.Ref, cfgBranch)
+	if !utils.Contains(cfgBranches, p.Ref) {
+		log.Printf("Not calling notify, received update refers to %s, which is not specified in %s", p.Ref, cfgBranches)
 		return
 	}
 
