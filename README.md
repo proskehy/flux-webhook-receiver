@@ -25,7 +25,7 @@ The service runs on port `3033` and individual webhook handlers are exposed on p
 Environment variables to configure the deployment:
 
   * `GIT_ENABLED`: Enable the endpoint for Git repo webhooks (default `true`)
-  * `DOCKER_ENABLE`: Enable the endpoit for Docker registry webhooks (default `true`)
+  * `DOCKER_ENABLED`: Enable the endpoit for Docker registry webhooks (default `true`)
   * `GIT_WEBHOOK_SECRET`: Secret to verify the Git repo webhook payload with (not set by default)
   * `GIT_BRANCHES`: Git branches to receive webhooks from specified as space separated values e.g. `master develop` (default `master`)
   * `GIT_HOST`: Git repository host that the webhooks will be coming from (default `github`) 
