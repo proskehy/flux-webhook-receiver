@@ -181,16 +181,22 @@ spec:
         image: flux-webhook-receiver
         imagePullPolicy: IfNotPresent
         ports:
-        # Do not change
+        # Do not change the containerPort
         - containerPort: 3033
         env:
-        - name: GIT_WEBHOOK_SECRET
-          value: 
+         #- name: GIT_WEBHOOK_SECRET
+         #  valueFrom:
+         #    secretKeyRef:
+         #      name: webhook-secrets
+         #      key: gitsecret
+         #- name: DOCKER_WEBHOOK_SECRET
+         #  valueFrom:
+         #    secretKeyRef:
+         #      name: webhook-secrets
+         #      key: gitsecret        
         - name: GIT_BRANCHES
-          value: 
+          value: master 
         - name: GIT_HOST
           value: github
         - name: FLUX_DOCKER_HOST
           value: dockerhub
-        - name: DOCKER_WEBHOOK_SECRET
-          value: 
